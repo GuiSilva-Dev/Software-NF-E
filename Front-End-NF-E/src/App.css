@@ -16,6 +16,13 @@
   color: #333;
 }
 
+/**RETIRA CAIXA DE NUMBER DO INPUT*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 h1 {
   color: aliceblue;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -77,6 +84,7 @@ button {
     min-height: 100vh;
     padding: 20px 10px;
     justify-content: flex-start;
+    box-sizing: content-box;
   }
 
   h1 {
@@ -132,7 +140,7 @@ button {
 /* Responsividade para Telas Muito Pequenas */
 @media screen and (max-width: 480px) {
   .Container {
-    padding: 15px 5px;
+    padding: 15px auto;
   }
 
   h1 {

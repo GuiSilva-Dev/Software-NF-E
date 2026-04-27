@@ -94,6 +94,20 @@ function App() {
       return;
     }
 
+    //*FUNÇÃO PARA CONFIRMAÇÃO DE N° FICHA
+    const confirmacao = await swal.fire({
+      icon: 'question',
+      title: 'Confirmar envio',
+      text: `O número da ficha é ${formulario.record}. Deseja continuar?`,
+      showCancelButton: true,
+        
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (!confirmacao.isConfirmed) {
+      return;
+    }
+
     const dadosParaOJava = {
       empresa: {
         nameEnterprise: formulario.nameEnterprise,
@@ -121,6 +135,7 @@ function App() {
         paymentMethod: formulario.paymentMethod,
         warrantyPeriod: formulario.warrantyPeriod
       },
+      
     }
 
     console.log("Dados para o Java:", dadosParaOJava);
@@ -156,11 +171,14 @@ function App() {
         paymentMethod: "",
         warrantyPeriod: "",
       });
+
+
     } catch (error) {
       console.error("Erro ao enviar dados para o Java:", error); //*ERRO DA API
     }
   }
   //*FIM DA FUNÇÃO DE ENVIAR DADOS PARA O JAVA
+
 
   //* Função temporária para o botão funcionar
   function handleGeneratePdf() {
@@ -193,7 +211,7 @@ function App() {
         <p>
           <label htmlFor="cnpjEnterprise" autoComplete='off'>CNPJ:</label>
           <input
-            type="text"
+            type="number"
             id="cnpjEnterprise"
             name="cnpjEnterprise"
             required
@@ -205,7 +223,7 @@ function App() {
         <p>
           <label htmlFor="phoneEnterprise" autoComplete='off'>Telefone:</label>
           <input
-            type="text"
+            type="number"
             id="phoneEnterprise"
             name="phoneEnterprise"
             required
@@ -230,7 +248,7 @@ function App() {
         <p>
           <label htmlFor="cpfCustomer" autoComplete='off'>CPF:</label>
           <input
-            type="text"
+            type="number"
             id="cpfCustomer"
             name="cpfCustomer"
             required
@@ -254,7 +272,7 @@ function App() {
         <p>
           <label htmlFor="phoneCustomer" autoComplete='off'>Telefone:</label>
           <input
-            type="text"
+            type="number"
             id="phoneCustomer"
             name="phoneCustomer"
             required
@@ -313,7 +331,7 @@ function App() {
         <p>
           <label htmlFor="record" autoComplete='off'>N° Ficha:</label>
           <input
-            type="text"
+            type="number"
             id="record"
             name="record"
             required
@@ -384,7 +402,7 @@ function App() {
         <p>
           <label htmlFor="value" translate="no" autoComplete='off'>Valor:</label>
           <input
-            type="value"
+            type="number"
             id="value"
             name="value"
             required

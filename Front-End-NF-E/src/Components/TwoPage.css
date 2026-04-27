@@ -165,6 +165,8 @@
 @media screen and (max-width: 768px) {
     .pageTwo {
         padding: 20px 10px;
+        justify-content: flex-start;
+        box-sizing: content-box
     }
 
     .pageTwo h1 {
