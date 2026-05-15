@@ -100,7 +100,7 @@ function App() {
       title: 'Confirmar envio',
       text: `O número da ficha é ${formulario.record}. Deseja continuar?`,
       showCancelButton: true,
-        
+
       cancelButtonText: 'Cancelar',
     });
 
@@ -135,7 +135,7 @@ function App() {
         paymentMethod: formulario.paymentMethod,
         warrantyPeriod: formulario.warrantyPeriod
       },
-      
+
     }
 
     console.log("Dados para o Java:", dadosParaOJava);
@@ -413,14 +413,20 @@ function App() {
 
         <p>
           <label htmlFor="paymentMethod" autoComplete='off'>Método:</label>
-          <input
+          <select
             type="text"
             id="paymentMethod"
             name="paymentMethod"
             required
             value={formulario.paymentMethod}
-            onChange={handleChange}
-          />
+            onChange={handleChange}>
+
+            <option value="" disabled selected>Selecione uma forma de pagamento</option>
+            <option value="dinheiro">Dinheiro</option>
+            <option value="cartao">Cartão</option>
+            <option value="pix">PIX</option>
+
+          </select>
         </p>
 
         <h2>Garantia</h2>
