@@ -1,0 +1,27 @@
+2026-04-25 23:13:14.230799-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM TB_RECIBOS TB_RECIBOS [*]TB_RECIBOS TB_RECIBOS"; SQL statement:
+SELECT * FROM TB_RECIBOS TB_RECIBOS TB_RECIBOS TB_RECIBOS [42000-232]
+2026-04-25 23:13:14.869035-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM TB_RECIBOS TB_RECIBOS [*]TB_RECIBOS TB_RECIBOS"; SQL statement:
+SELECT * FROM TB_RECIBOS TB_RECIBOS TB_RECIBOS TB_RECIBOS [42000-232]
+2026-04-26 02:30:19.733510-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]deelete from *"; expected "DELETE, DROP"; SQL statement:
+deelete from * [42001-232]
+2026-04-26 02:30:28.357240-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete from [*]*"; expected "identifier"; SQL statement:
+delete from * [42001-232]
+2026-04-26 02:30:36.447705-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete from [*]*TB_RECIBOS TB_RECIBOS"; expected "identifier"; SQL statement:
+delete from *TB_RECIBOS TB_RECIBOS [42001-232]
+2026-04-26 02:30:38.036537-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete from [*]*TB_RECIBOS TB_RECIBOS"; expected "identifier"; SQL statement:
+delete from *TB_RECIBOS TB_RECIBOS [42001-232]
+2026-04-26 02:30:38.532579-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete from [*]*TB_RECIBOS TB_RECIBOS"; expected "identifier"; SQL statement:
+delete from *TB_RECIBOS TB_RECIBOS [42001-232]
+2026-04-26 02:30:38.887790-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete from [*]*TB_RECIBOS TB_RECIBOS"; expected "identifier"; SQL statement:
+delete from *TB_RECIBOS TB_RECIBOS [42001-232]
+2026-04-26 02:36:46.865031-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TB_RECIBOSTB_RECIBOS" not found; SQL statement:
+ALTER TABLE tb_recibosTB_RECIBOS  ALTER COLUMN id RESTART WITH 1 [42102-232]

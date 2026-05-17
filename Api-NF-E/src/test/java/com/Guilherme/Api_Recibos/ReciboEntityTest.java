@@ -1,5 +1,7 @@
 package com.Guilherme.Api_Recibos;
 
+import com.Guilherme.Api_Recibos.domain.ReciboEntity;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReciboEntityTest {

@@ -46,7 +46,7 @@ public class SistemaRecibo {
             gerador.gerar(dados, caminhoCompleto);
 
             System.out.println("PDF gerado com sucesso para: " + dados.cliente.nameCustomer);
-/// SALVA NO BANCO
+            /// SALVA NO BANCO
             ReciboEntity novoRecibo = new ReciboEntity();
             novoRecibo.setNomeCliente(dados.cliente.nameCustomer);
             novoRecibo.setValorTotal(dados.servico.value);
