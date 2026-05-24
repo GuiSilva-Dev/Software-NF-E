@@ -42,7 +42,6 @@ public class ReciboController {
             return ResponseEntity.internalServerError().body("Erro ao processar: " + e.getMessage());
         }
     }
-
     /**
      * Rota responsável por buscar um recibo no banco de dados,
      * localizar o arquivo físico no servidor e enviá-lo para download no Front-end.
