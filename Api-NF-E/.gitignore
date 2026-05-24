@@ -8,6 +8,7 @@ target/
 *.iws
 *.iml
 *.ipr
+Banco_de_dados/
 
 ### Banco de dados de pdfs ###
 /Pdfs_gerados
