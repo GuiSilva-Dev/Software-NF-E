@@ -16,7 +16,6 @@ import com.Guilherme.Api_Recibos.repository.*;
 import com.Guilherme.Api_Recibos.service.*;
 import  com.Guilherme.Api_Recibos.domain.*;
 
-
 @RestController
 @RequestMapping("/api/recibos")//Define o caminho
 public class ReciboController {
@@ -42,7 +41,6 @@ public class ReciboController {
             return ResponseEntity.internalServerError().body("Erro ao processar: " + e.getMessage());
         }
     }
-
     /**
      * Rota responsável por buscar um recibo no banco de dados,
      * localizar o arquivo físico no servidor e enviá-lo para download no Front-end.
