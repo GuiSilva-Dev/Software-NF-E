@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import com.Guilherme.Api_Recibos.domain.*;
 
-
 @Repository
 public interface ReciboRepository extends JpaRepository<ReciboEntity, Long> {
 
