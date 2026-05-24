@@ -31,7 +31,7 @@ public class SistemaRecibo {
 
             /// SE A PASTA NAO EXISTIR, CRIA UMA
             if (!Files.exists(caminhoDaPasta)) {
-                Files.createDirectory(caminhoDaPasta);
+                Files.createDirectories(caminhoDaPasta);
             }
 
             // 2. Pega o nome do cliente diretamente da "gaveta" de dados
