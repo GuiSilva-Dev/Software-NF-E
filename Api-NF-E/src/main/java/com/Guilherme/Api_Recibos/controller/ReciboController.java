@@ -16,7 +16,7 @@ import com.Guilherme.Api_Recibos.repository.*;
 import com.Guilherme.Api_Recibos.service.*;
 import  com.Guilherme.Api_Recibos.domain.*;
 
-
+@CrossOrigin(origins = "https://aquamarine-sprite-f048cf.netlify.app/")
 @RestController
 @RequestMapping("/api/recibos")//Define o caminho
 public class ReciboController {
