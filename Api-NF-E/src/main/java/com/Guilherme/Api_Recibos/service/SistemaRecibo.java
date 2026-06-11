@@ -1,7 +1,9 @@
 package com.Guilherme.Api_Recibos.service;
 
-import org.apache.commons.mail.EmailAttachment;
-import org.apache.commons.mail.MultiPartEmail;
+import com.resend.Resend;
+import com.resend.services.emails.model.Attachment;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Base64;
+
 import com.Guilherme.Api_Recibos.dto.*;
 import com.Guilherme.Api_Recibos.repository.*;
 import com.Guilherme.Api_Recibos.domain.*;
@@ -19,34 +23,28 @@ public class SistemaRecibo {
     @Autowired
     private ReciboRepository Repository;
 
-    //Recebe o (DadosRecibo) inteiro!
     public void processarRecibo(DadosRecibo dados) {
-        try {
+        try { // INÍCIO DO TRY PRINCIPAL
             System.out.println("Iniciando processo");
 
-            /// CRIA A VARIAVEIS DO BANCO E DO CAMINHO COMPLETO PRO BANCO
-            /// nome da pasta para 'pdfs_salvos' para não misturar o arquivo do banco com os PDFs
             String nomeDoBanco = "Pdfs_gerados/recibosdb";
             Path caminhoDaPasta = Paths.get(nomeDoBanco);
 
-            /// SE A PASTA NAO EXISTIR, CRIA UMA
             if (!Files.exists(caminhoDaPasta)) {
                 Files.createDirectories(caminhoDaPasta);
             }
 
-            // 2. Pega o nome do cliente diretamente da "gaveta" de dados
             String nomeArquivo = "Recibo_" + dados.servico.record + ".pdf";
             String caminhoCompleto = caminhoDaPasta + "/" + nomeArquivo;
 
             System.out.println("Iniciando a geração do PDF...");
 
-            //Passa as gavetas que vieram do React direto para o PDF.
             GeradorPDF gerador = new GeradorPDF();
-            // Lembre-se que o seu GeradorPDF agora espera (DadosRecibo, String)
             gerador.gerar(dados, caminhoCompleto);
 
             System.out.println("PDF gerado com sucesso para: " + dados.cliente.nameCustomer);
-            /// SALVA NO BANCO
+
+            // SALVA NO BANCO
             ReciboEntity novoRecibo = new ReciboEntity();
             novoRecibo.setNomeCliente(dados.cliente.nameCustomer);
             novoRecibo.setValorTotal(dados.servico.value);
@@ -55,46 +53,46 @@ public class SistemaRecibo {
             novoRecibo.setRecord(dados.servico.record);
 
             Repository.save(novoRecibo);
-            System.out.println("E-mail enviado");
-
             System.out.println(dados.cliente.nameCustomer + " salvo com sucesso");
 
-            // --- ENVIAR POR EMAIL O PDF ---
+            // --- ENVIAR POR EMAIL O PDF (VIA RESEND) ---
             String emailDestino = dados.cliente.emailCustomer;
 
-            // Só tenta enviar se o cliente realmente digitou um email no React
             if (emailDestino != null && !emailDestino.trim().isEmpty()) {
+                try { // INÍCIO DO TRY DO RESEND
+                    byte[] pdfBytes = Files.readAllBytes(Paths.get(caminhoCompleto));
+                    String pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
 
-                EmailAttachment anexo = new EmailAttachment();
-                anexo.setPath(caminhoCompleto);
-                anexo.setDisposition(EmailAttachment.ATTACHMENT);
-                anexo.setName(nomeArquivo);
+                    Attachment anexoResend = Attachment.builder()
+                            .fileName(nomeArquivo)
+                            .content(pdfBase64)
+                            .build();
 
-                MultiPartEmail email = new MultiPartEmail();
-                email.setHostName("smtp.gmail.com");
-                email.setSmtpPort(587); // Porta do TLS
+                    // COLOQUE SUA CHAVE AQUI ABAIXO!
+                    Resend resend = new Resend("re_SUACHAVEAQUI_123456789");
 
-                email.setAuthentication("Guih.bittencourt23@gmail.com", "ldzfgjylkmoubslo");
-                email.setStartTLSEnabled(true);
+                    CreateEmailOptions parametros = CreateEmailOptions.builder()
+                            .from("Recibos Hdmr Ar <onboarding@resend.dev>")
+                            .to(emailDestino)
+                            .subject("Recibo de Serviço Hdmr Ar - " + dados.cliente.nameCustomer)
+                            .html("<p>Olá <strong>" + dados.cliente.nameCustomer + "</strong>,</p><p>Segue em anexo o seu recibo digital referente ao serviço prestado.</p><p>Obrigado pela preferência!</p>")
+                            .attachments(anexoResend)
+                            .build();
 
-                email.addTo(emailDestino);
-                email.setFrom("Guih.bittencourt23@gmail.com", "Hdmr Ar"); // Remetente
-                email.setSubject("Recibo de Serviço Hdmr Ar - " + dados.cliente.nameCustomer);
-                email.setMsg("Olá " + dados.cliente.nameCustomer + ",\n\nSegue em anexo o seu recibo digital referente ao serviço prestado.\n\nObrigado pela preferência!");
+                    CreateEmailResponse resposta = resend.emails().send(parametros);
+                    System.out.println("Email enviado com sucesso via Resend! ID: " + resposta.getId());
 
-                email.attach(anexo);
-                email.send();
+                } catch (Exception erroResend) {
+                    System.err.println("Erro ao tentar enviar o e-mail pelo Resend: " + erroResend.getMessage());
+                } // FIM DO TRY/CATCH DO RESEND
 
-                System.out.println("Email enviado com sucesso para: " + emailDestino);
             } else {
-                System.out.println("Nenhum email foi preenchido. O PDF foi gerado e salvo no computador, mas não foi enviado por email.");
+                System.out.println("Nenhum email foi preenchido. O PDF foi gerado e salvo.");
             }
 
-        } catch (Exception e) {
+        } catch (Exception e) { // ESSE ERA O CATCH QUE FALTAVA
             e.printStackTrace();
-            // Avisa o Controller que deu erro
             throw new RuntimeException("Falha ao processar o recibo: " + e.getMessage());
         }
     }
-
 }

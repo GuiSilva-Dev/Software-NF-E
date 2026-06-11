@@ -28,8 +28,6 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <!-- Adicionamos UTF-8 para garantir que caracteres acentuados ou especiais presentes nos arquivos 
-             do Java não quebrem o empacotamento com o erro "MalformedInputException". -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -67,8 +65,12 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.resend</groupId>
+            <artifactId>resend-java</artifactId>
+            <version>3.1.0</version>
+        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
