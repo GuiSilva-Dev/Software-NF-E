@@ -69,7 +69,7 @@ public class SistemaRecibo {
                             .build();
 
                     // COLOQUE SUA CHAVE AQUI ABAIXO!
-                    Resend resend = new Resend("re_SUACHAVEAQUI_123456789");
+                    Resend resend = new Resend("re_GyMj3TJ8_7P44KbwaFkXzhAaoSiuGMKxx");
 
                     CreateEmailOptions parametros = CreateEmailOptions.builder()
                             .from("Recibos Hdmr Ar <onboarding@resend.dev>")
@@ -86,6 +86,10 @@ public class SistemaRecibo {
                     System.err.println("Erro ao tentar enviar o e-mail pelo Resend: " + erroResend.getMessage());
                 } // FIM DO TRY/CATCH DO RESEND
 
+                //email.attach(anexo);
+                //email.send();
+
+                //System.out.println("Email enviado com sucesso para: " + emailDestino);
             } else {
                 System.out.println("Nenhum email foi preenchido. O PDF foi gerado e salvo.");
             }
@@ -96,3 +100,4 @@ public class SistemaRecibo {
         }
     }
 }
+
