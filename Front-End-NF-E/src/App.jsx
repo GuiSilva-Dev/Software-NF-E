@@ -7,8 +7,14 @@ import swal from 'sweetalert2'
 
 
 function App() {
-  //* Atualiza o estado ao clicar no button twopage
+  //* Atualiza o estado ao clicar no button 
   const [exibirPdf, setExibirPdf] = useState(false);
+  const [acessoLiberado, setAcessoLiberado] = useState(false);
+  const [senhaAcesso, setSenhaAcesso] = useState('');
+  const [mostrarTelaSenha, setMostrarTelaSenha] = useState(true);
+  const [erroSenha, setErroSenha] = useState('');
+
+  const senhaProtegida = import.meta.env.VITE_PAGE_PASSWORD;
 
   const [formulario, setFormulario] = useState({
     //*OBJETOS JAVASCRIPT
@@ -47,6 +53,20 @@ function App() {
       [name]: value
     });
   }
+
+  function handleAcessoComSenha(e) {
+    e.preventDefault();
+
+    if (senhaAcesso === senhaProtegida) {
+      localStorage.setItem('token', 'acesso-autorizado');
+      setAcessoLiberado(true);
+      setMostrarTelaSenha(false);
+      setErroSenha('');
+    } else {
+      setErroSenha('Senha incorreta');
+    }
+  }
+
   const validarCampos = () => {
 
     const NomesCampos = {
@@ -183,6 +203,35 @@ function App() {
   //* Função temporária para o botão funcionar
   function handleGeneratePdf() {
     setExibirPdf(true);
+  }
+
+  if (mostrarTelaSenha || !acessoLiberado) {
+    return (
+      <div className='Container'>
+        <h1>Acesso restrito</h1>
+   
+
+        <form className='password-form' onSubmit={handleAcessoComSenha}>
+          <p>
+            <label htmlFor="senhaAcesso">Senha:</label>
+            <input
+              type="password"
+              id="senhaAcesso"
+              name="senhaAcesso"
+              value={senhaAcesso}
+              onChange={(e) => {
+                setSenhaAcesso(e.target.value);
+                setErroSenha('');
+              }}
+            />
+          </p>
+
+          {erroSenha && <p style={{ color: 'red' }}>{erroSenha}</p>}
+
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
+    );
   }
 
   if (exibirPdf) {
@@ -448,9 +497,6 @@ function App() {
           <ButtonPdf label="Gerar PDF" onClick={handleGeneratePdf} />
         </div>
       </form>
-
-
-
     </div>
 
   )

@@ -9,7 +9,7 @@
   height: 100%;
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(135deg, #43b88b9b 0%, #3a9d7c00 50%, #2d7a62 100% );
+  background: linear-gradient(135deg, #43b88b9b 0%, #3a9d7c00 50%, #2d7a62 100%);
   font-family: Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
@@ -66,8 +66,9 @@ input {
   color: #000000;
   box-sizing: border-box;
 }
+
 input[type="date"]::-webkit-calendar-picker-indicator {
-filter: invert(1);
+  filter: invert(1);
 }
 
 select {
@@ -89,7 +90,7 @@ form div {
 button {
   padding: 10px 19px;
   margin: 10px 10px;
-} 
+}
 
 /* Responsividade para Mobile */
 @media screen and (max-width: 768px) {
@@ -98,7 +99,15 @@ button {
     min-height: 100vh;
     padding: 20px 10px;
     justify-content: flex-start;
-    box-sizing: content-box;
+    box-sizing: border-box;
+  }
+
+  .password-form {
+    width: 90%;
+    max-width: 100vw;
+    margin:auto ;
+    
+
   }
 
   h1 {
