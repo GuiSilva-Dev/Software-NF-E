@@ -1,16 +1,14 @@
 package com.Guilherme.Api_Recibos.domain;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "tb_recibos")
-/// MOLDE DO BANCO DE DADOS H2
+@Document(collection = "registro_recibos")
 public class ReciboEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String nomeCliente;
     private Double valorTotal;
@@ -18,11 +16,11 @@ public class ReciboEntity {
     private String caminhoArquivo;
     private String record;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

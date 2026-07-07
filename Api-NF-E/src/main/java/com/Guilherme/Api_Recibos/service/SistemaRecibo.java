@@ -68,8 +68,8 @@ public class SistemaRecibo {
                             .content(pdfBase64)
                             .build();
 
-                    // COLOQUE SUA CHAVE AQUI ABAIXO!
-                    Resend resend = new Resend("re_GyMj3TJ8_7P44KbwaFkXzhAaoSiuGMKxx");
+                    String chave = System.getenv("CHAVE_EMAIL");
+                    Resend resend = new Resend(chave);
 
                     CreateEmailOptions parametros = CreateEmailOptions.builder()
                             .from("Recibos Hdmr Ar <onboarding@resend.dev>")

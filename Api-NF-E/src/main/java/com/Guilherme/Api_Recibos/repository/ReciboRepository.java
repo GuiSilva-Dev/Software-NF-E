@@ -1,14 +1,11 @@
 package com.Guilherme.Api_Recibos.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.Guilherme.Api_Recibos.domain.ReciboEntity;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
-import com.Guilherme.Api_Recibos.domain.*;
 
 @Repository
-public interface ReciboRepository extends JpaRepository<ReciboEntity, Long> {
-
+public interface ReciboRepository extends MongoRepository<ReciboEntity, String> {
     Optional<ReciboEntity> findByRecord(String record);
-
 }
