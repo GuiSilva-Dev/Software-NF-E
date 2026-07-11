@@ -13,6 +13,7 @@ function App() {
   const [senhaAcesso, setSenhaAcesso] = useState('');
   const [mostrarTelaSenha, setMostrarTelaSenha] = useState(true);
   const [erroSenha, setErroSenha] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const senhaProtegida = import.meta.env.VITE_PAGE_PASSWORD;
 
@@ -207,29 +208,41 @@ function App() {
 
   if (mostrarTelaSenha || !acessoLiberado) {
     return (
-      <div className='Container'>
-        <h1>Acesso restrito</h1>
-   
+      <div className='login-page'>
+        <div className='login-card'>
+          <div className='login-icon'>🔒</div>
+          <h1 className='login-title'>Acesso restrito</h1>
+          <p className='login-subtitle'>Digite a senha para continuar</p>
 
-        <form className='password-form' onSubmit={handleAcessoComSenha}>
-          <p>
-            <label htmlFor="senhaAcesso">Senha:</label>
-            <input
-              type="password"
-              id="senhaAcesso"
-              name="senhaAcesso"
-              value={senhaAcesso}
-              onChange={(e) => {
-                setSenhaAcesso(e.target.value);
-                setErroSenha('');
-              }}
-            />
-          </p>
+          <form className='password-form' onSubmit={handleAcessoComSenha}>
+            <div className={`login-input-wrapper ${erroSenha ? 'input-error' : ''}`}>
+              <input
+                type={passwordVisible ? 'text' : 'password'}
+                id="senhaAcesso"
+                name="senhaAcesso"
+                placeholder='Senha'
+                autoFocus
+                value={senhaAcesso}
+                onChange={(e) => {
+                  setSenhaAcesso(e.target.value);
+                  setErroSenha('');
+                }}
+              />
+              <button
+                type="button"
+                className='toggle-password'
+                aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
+                onClick={() => setPasswordVisible(!passwordVisible)}
+              >
+                {passwordVisible ? '🙈' : '👁️'}
+              </button>
+            </div>
 
-          {erroSenha && <p style={{ color: 'red' }}>{erroSenha}</p>}
+            {erroSenha && <p className='login-error'>{erroSenha}</p>}
 
-          <button type="submit">Entrar</button>
-        </form>
+            <button type="submit" className='login-button'>Entrar</button>
+          </form>
+        </div>
       </div>
     );
   }
