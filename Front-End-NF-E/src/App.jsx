@@ -195,6 +195,13 @@ function App() {
 
     } catch (error) {
       console.error("Erro ao enviar dados para o Java:", error); //*ERRO DA API
+
+      const duplicado = error.response && error.response.status === 409;
+      swal.fire({
+        icon: 'error',
+        title: duplicado ? 'Ficha duplicada' : 'Erro ao enviar recibo',
+        text: error.response?.data || "Não foi possível enviar o recibo. Tente novamente.",
+      });
     }
   }
   //*FIM DA FUNÇÃO DE ENVIAR DADOS PARA O JAVA

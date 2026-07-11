@@ -2,22 +2,27 @@ package com.Guilherme.Api_Recibos.service;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.awt.Color;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import com.Guilherme.Api_Recibos.dto.*;
 import com.Guilherme.Api_Recibos.util.Design;
 
 public class GeradorPDF {
 
-    /// O método recebe o pacote completo de dados
-    public void gerar(DadosRecibo dados, String caminhoArquivo) throws IOException {
+    private static final Logger logger = LoggerFactory.getLogger(GeradorPDF.class);
+
+    public byte[] gerar(DadosRecibo dados) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Document documento = new Document(PageSize.LEGAL);
-        PdfWriter.getInstance(documento, new FileOutputStream(caminhoArquivo));
+        PdfWriter.getInstance(documento, outputStream);
         documento.open();
 
         montarHeader(documento, dados);
@@ -26,17 +31,15 @@ public class GeradorPDF {
         addAssinaturas(documento);
 
         documento.close();
+
+        return outputStream.toByteArray();
     }
 
     private void montarHeader(Document documento, DadosRecibo dados) throws IOException {
-
-
-        //Usa 'dados.empresa' em vez de 'DadosEmpresa'
         Paragraph titulo = new Paragraph("NOTA DE SERVIÇO", Design.F_TITULO);
         titulo.setAlignment(Element.ALIGN_CENTER);
         documento.add(titulo);
 
-        // Subtítulo com CNPJ e Telefone
         Paragraph subtitulo = new Paragraph("CNPJ: " + dados.empresa.cnpjEnterprise + " | Contato: " + dados.empresa.phoneEnterprise, Design.F_RODAPE);
         subtitulo.setAlignment(Element.ALIGN_CENTER);
         subtitulo.setSpacingAfter(20);
@@ -44,18 +47,16 @@ public class GeradorPDF {
     }
 
     private void createTable(Document documento, DadosRecibo dados) throws IOException {
-        // Criando a Tabela Principal
         PdfPTable table = new PdfPTable(new float[]{1f, 2f});
         table.setWidthPercentage(100);
 
-        //Variavel de formatação de data e hora
         String dataEntradaFormatada = formatarDataReactParaBR(dados.servico.inputDate);
-        //Empresa
+
         addCabecalhoSecao(table, "Dados da Empresa");
         addLinha(table, "Razão Social:", dados.empresa.nameEnterprise);
         addLinha(table, "CNPJ:", dados.empresa.cnpjEnterprise);
         addLinha(table, "Telefone:", dados.empresa.phoneEnterprise);
-        //Cliente
+
         addCabecalhoSecao(table, "Dados do Cliente");
         addLinha(table, "Nome:", dados.cliente.nameCustomer);
         addLinha(table, "CPF:", dados.cliente.cpfCustomer);
@@ -65,7 +66,7 @@ public class GeradorPDF {
         addLinha(table, "Numero: ", dados.cliente.numberCustomer);
         addLinha(table, "Cidade:", dados.cliente.cityCustomer);
         addLinha(table, "Estado:", dados.cliente.stateCustomer);
-        //Serviço
+
         addCabecalhoSecao(table, "Dados do Conserto");
         addLinha(table, "N° Ficha:", dados.servico.record);
         addLinha(table, "Data de Entrada", dataEntradaFormatada);
@@ -99,9 +100,7 @@ public class GeradorPDF {
         documento.add(mensagem);
     }
 
-
     private void addAssinaturas(Document documento) throws DocumentException {
-        /// Cria a coluna de assinaturas
         PdfPTable tabelaAssinaturas = new PdfPTable(2);
         tabelaAssinaturas.getDefaultCell().setBorder(Rectangle.NO_BORDER);
         tabelaAssinaturas.setWidthPercentage(100);
@@ -113,7 +112,6 @@ public class GeradorPDF {
 
         Paragraph linhaCliente = new Paragraph("\n\n____________________________________\nAssinatura do Cliente", Design.F_NEGRITO);
         linhaCliente.setAlignment(Element.ALIGN_CENTER);
-
         celulaCliente.addElement(linhaCliente);
 
         PdfPCell celulaEmpresa = new PdfPCell();
@@ -121,21 +119,22 @@ public class GeradorPDF {
         celulaEmpresa.setHorizontalAlignment(Element.ALIGN_CENTER);
 
         try {
-            /// IMG DA ASSINATURA DA EMPRESA
-            Image imgAssinatura = Image.getInstance("src/main/resources/img/Assinatura-Digital.png");
+            URL urlAssinatura = getClass().getClassLoader().getResource("img/Assinatura-Digital.png");
+            URL urlQrcode = getClass().getClassLoader().getResource("img/Loja-Hdmr-Ar.png");
+
+            Image imgAssinatura = Image.getInstance(urlAssinatura);
             imgAssinatura.scaleToFit(100, 60);
             imgAssinatura.setAlignment(Element.ALIGN_CENTER);
             celulaEmpresa.addElement(imgAssinatura);
 
-            /// IMG DO WRCODE DO WEBSITE DA LOJA
-            Image imgQrcode = Image.getInstance("src/main/resources/img/Loja-Hdmr-Ar.png");
+            Image imgQrcode = Image.getInstance(urlQrcode);
             imgQrcode.scaleToFit(60, 60);
             imgQrcode.setAlignment(Element.ALIGN_RIGHT);
             imgQrcode.setSpacingBefore(30);
             documento.add(imgQrcode);
 
         } catch (Exception e) {
-            System.out.println("Erro ao tentar gerar imagem ao arquivo");
+            logger.warn("Não foi possível carregar as imagens de assinatura do PDF: {}", e.getMessage());
             Paragraph espaco = new Paragraph("\n\n\n");
             documento.add(espaco);
         }
@@ -152,44 +151,43 @@ public class GeradorPDF {
 
     private String formatarDataReactParaBR(String dataReact) {
         if (dataReact != null && !dataReact.trim().isEmpty()) {
-            DateTimeFormatter moldeLeitura = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            DateTimeFormatter moldeEscrita = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate dataReal = LocalDate.parse(dataReact, moldeLeitura);
-            return dataReal.format(moldeEscrita);
+            try {
+                DateTimeFormatter moldeLeitura = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter moldeEscrita = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate dataReal = LocalDate.parse(dataReact, moldeLeitura);
+                return dataReal.format(moldeEscrita);
+            } catch (DateTimeParseException e) {
+                logger.warn("Data de entrada em formato inesperado ('{}'), mantendo valor original", dataReact);
+                return dataReact;
+            }
         }
         return "";
     }
 
-    /// Cria a faixa divisória azul clara com borda
     private void addCabecalhoSecao(PdfPTable table, String titulo) {
         PdfPCell cell = new PdfPCell(new Phrase(titulo, Design.F_SECAO));
         cell.setColspan(2);
         cell.setBackgroundColor(Design.AZUL_CLARO);
         cell.setPadding(8);
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-
-        /// MUDANÇA: Definimos uma cor de borda visível (pode ser cinza ou a cor do título)
         cell.setBorderColor(Color.LIGHT_GRAY);
-        cell.setBorderWidth(0.5f); // Define a grossura da linha
-
+        cell.setBorderWidth(0.5f);
         table.addCell(cell);
     }
 
-    // Cria as linhas normais de dados com bordas conectadas
     private void addLinha(PdfPTable table, String rotulo, String valor) {
-        // Coluna 1 (Rótulo)
         PdfPCell c1 = new PdfPCell(new Phrase(rotulo, Design.F_NEGRITO));
         c1.setBackgroundColor(Design.CINZA_CLARO);
         c1.setPadding(6);
         c1.setBorderColor(Color.LIGHT_GRAY);
-        c1.setBorderWidth(0.5f); // Garante que a linha externa apareça
+        c1.setBorderWidth(0.5f);
         table.addCell(c1);
-        // Coluna 2 (Valor)
+
         PdfPCell c2 = new PdfPCell(new Phrase(valor != null ? valor : "", Design.F_NORMAL));
         c2.setBackgroundColor(Design.BRANCO);
         c2.setPadding(6);
         c2.setBorderColor(Color.LIGHT_GRAY);
-        c2.setBorderWidth(0.5f); // Garante que a linha externa apareça
+        c2.setBorderWidth(0.5f);
         table.addCell(c2);
     }
 }

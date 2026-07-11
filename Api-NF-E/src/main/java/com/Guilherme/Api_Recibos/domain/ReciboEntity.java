@@ -1,7 +1,9 @@
 package com.Guilherme.Api_Recibos.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 
 @Document(collection = "registro_recibos")
@@ -12,8 +14,11 @@ public class ReciboEntity {
 
     private String nomeCliente;
     private Double valorTotal;
-    private LocalDateTime DataGeracao;
-    private String caminhoArquivo;
+    @Field("DataGeracao")
+    private LocalDateTime dataGeracao;
+    private byte[] pdfBytes;
+
+    @Indexed(unique = true)
     private String record;
 
     public String getId() {
@@ -41,19 +46,19 @@ public class ReciboEntity {
     }
 
     public LocalDateTime getDataGeracao() {
-        return DataGeracao;
+        return dataGeracao;
     }
 
     public void setDataGeracao(LocalDateTime dataGeracao) {
-        DataGeracao = dataGeracao;
+        this.dataGeracao = dataGeracao;
     }
 
-    public String getCaminhoArquivo() {
-        return caminhoArquivo;
+    public byte[] getPdfBytes() {
+        return pdfBytes;
     }
 
-    public void setCaminhoArquivo(String caminhoArquivo) {
-        this.caminhoArquivo = caminhoArquivo;
+    public void setPdfBytes(byte[] pdfBytes) {
+        this.pdfBytes = pdfBytes;
     }
 
     public String getRecord() {

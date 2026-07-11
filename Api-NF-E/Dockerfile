@@ -12,8 +12,6 @@ FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
 
-RUN mkdir -p /app/Banco_de_dados/pdfs_salvos
-
 COPY --from=build /app/target/*.jar api-recibos.jar
 
 EXPOSE 8080
