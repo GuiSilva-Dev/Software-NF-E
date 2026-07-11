@@ -11,16 +11,17 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // Indica que estas regras de CORS se aplicam a todas as rotas da API (/**)
         registry.addMapping("/**")
-                // Permite requisições de qualquer origem (seja localhost, um domínio de produção, etc.)
-                .allowedOriginPatterns("*") 
+                // Restringe às origens conhecidas do front-end (produção + dev local do Vite)
+                .allowedOriginPatterns(
+                        "https://aquamarine-sprite-f048cf.netlify.app",
+                        "http://localhost:5173"
+                )
                 // Autoriza o front-end a fazer requisições usando qualquer um desses métodos HTTP
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT")
-                // Permite o envio de quaisquer cabeçalhos na requisição
-                .allowedHeaders("*")
-                // Permite o uso de credenciais (cookies, headers de autenticação, etc)
-                .allowCredentials(true)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                // Cabeçalhos usados pelo front-end (JSON + chave de acesso)
+                .allowedHeaders("Content-Type", "X-Api-Key")
                 // EXPÕE o cabeçalho 'Content-Disposition' para o navegador ler. Isso é crucial
                 // para a funcionalidade de DOWNLOAD DE PDF, pois o React precisa extrair o nome do arquivo.
-                .exposedHeaders("Content-Disposition"); 
+                .exposedHeaders("Content-Disposition");
     }
 }

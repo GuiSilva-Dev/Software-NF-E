@@ -22,7 +22,10 @@ function TwoPage({ onVoltar }) {
 
         try {
             const response = await Api.get(`/api/recibos/download/${record}`, {
-                responseType: 'blob'
+                responseType: 'blob',
+                headers: {
+                    'X-Api-Key': import.meta.env.VITE_API_ACCESS_TOKEN
+                }
             });
 
             //* Cria link temporário para download do PDF
@@ -41,6 +44,8 @@ function TwoPage({ onVoltar }) {
             console.error("Erro ao baixar recibo:", error);
             if (error.response && error.response.status === 404) {
                 setMensagem({ texto: `Recibo com ficha N° ${record} não encontrado.`, tipo: "erro" });
+            } else if (error.response && error.response.status === 401) {
+                setMensagem({ texto: "Acesso não autorizado para baixar recibos.", tipo: "erro" });
             } else {
                 setMensagem({ texto: "Erro ao conectar com o servidor. Tente novamente.", tipo: "erro" });
             }

@@ -4,12 +4,12 @@ import com.resend.Resend;
 import com.resend.services.emails.model.Attachment;
 import com.resend.services.emails.model.CreateEmailOptions;
 import com.resend.services.emails.model.CreateEmailResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
@@ -17,87 +17,82 @@ import com.Guilherme.Api_Recibos.dto.*;
 import com.Guilherme.Api_Recibos.repository.*;
 import com.Guilherme.Api_Recibos.domain.*;
 
-@Service // Avisa o Spring para gerenciar a classe
+@Service
 public class SistemaRecibo {
 
+    private static final Logger logger = LoggerFactory.getLogger(SistemaRecibo.class);
+
     @Autowired
-    private ReciboRepository Repository;
+    private ReciboRepository reciboRepository;
 
-    public void processarRecibo(DadosRecibo dados) {
-        try { // INÍCIO DO TRY PRINCIPAL
-            System.out.println("Iniciando processo");
+    /**
+     * @return true se o e-mail foi enviado com sucesso; false se não havia e-mail
+     *         de destino ou se o envio falhou (o recibo já foi salvo em ambos os casos).
+     */
+    public boolean processarRecibo(DadosRecibo dados) {
+        logger.info("Iniciando processamento do recibo N° {}", dados.servico.record);
 
-            String nomeDoBanco = "Pdfs_gerados/recibosdb";
-            Path caminhoDaPasta = Paths.get(nomeDoBanco);
+        if (reciboRepository.findByRecord(dados.servico.record).isPresent()) {
+            throw new DuplicateKeyException("Já existe um recibo com o número de ficha " + dados.servico.record);
+        }
 
-            if (!Files.exists(caminhoDaPasta)) {
-                Files.createDirectories(caminhoDaPasta);
-            }
-
-            String nomeArquivo = "Recibo_" + dados.servico.record + ".pdf";
-            String caminhoCompleto = caminhoDaPasta + "/" + nomeArquivo;
-
-            System.out.println("Iniciando a geração do PDF...");
-
+        try {
             GeradorPDF gerador = new GeradorPDF();
-            gerador.gerar(dados, caminhoCompleto);
+            byte[] pdfBytes = gerador.gerar(dados);
 
-            System.out.println("PDF gerado com sucesso para: " + dados.cliente.nameCustomer);
+            logger.info("PDF gerado com sucesso para: {}", dados.cliente.nameCustomer);
 
-            // SALVA NO BANCO
             ReciboEntity novoRecibo = new ReciboEntity();
             novoRecibo.setNomeCliente(dados.cliente.nameCustomer);
             novoRecibo.setValorTotal(dados.servico.value);
             novoRecibo.setDataGeracao(LocalDateTime.now());
-            novoRecibo.setCaminhoArquivo(caminhoCompleto);
             novoRecibo.setRecord(dados.servico.record);
+            novoRecibo.setPdfBytes(pdfBytes);
 
-            Repository.save(novoRecibo);
-            System.out.println(dados.cliente.nameCustomer + " salvo com sucesso");
+            reciboRepository.save(novoRecibo);
+            logger.info("{} salvo com sucesso", dados.cliente.nameCustomer);
 
-            // --- ENVIAR POR EMAIL O PDF (VIA RESEND) ---
             String emailDestino = dados.cliente.emailCustomer;
 
-            if (emailDestino != null && !emailDestino.trim().isEmpty()) {
-                try { // INÍCIO DO TRY DO RESEND
-                    byte[] pdfBytes = Files.readAllBytes(Paths.get(caminhoCompleto));
-                    String pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
-
-                    Attachment anexoResend = Attachment.builder()
-                            .fileName(nomeArquivo)
-                            .content(pdfBase64)
-                            .build();
-
-                    String chave = System.getenv("CHAVE_EMAIL");
-                    Resend resend = new Resend(chave);
-
-                    CreateEmailOptions parametros = CreateEmailOptions.builder()
-                            .from("Recibos Hdmr Ar <onboarding@resend.dev>")
-                            .to(emailDestino)
-                            .subject("Recibo de Serviço Hdmr Ar - " + dados.cliente.nameCustomer)
-                            .html("<p>Olá <strong>" + dados.cliente.nameCustomer + "</strong>,</p><p>Segue em anexo o seu recibo digital referente ao serviço prestado.</p><p>Obrigado pela preferência!</p>")
-                            .attachments(anexoResend)
-                            .build();
-
-                    CreateEmailResponse resposta = resend.emails().send(parametros);
-                    System.out.println("Email enviado com sucesso via Resend! ID: " + resposta.getId());
-
-                } catch (Exception erroResend) {
-                    System.err.println("Erro ao tentar enviar o e-mail pelo Resend: " + erroResend.getMessage());
-                } // FIM DO TRY/CATCH DO RESEND
-
-                //email.attach(anexo);
-                //email.send();
-
-                //System.out.println("Email enviado com sucesso para: " + emailDestino);
-            } else {
-                System.out.println("Nenhum email foi preenchido. O PDF foi gerado e salvo.");
+            if (emailDestino == null || emailDestino.trim().isEmpty()) {
+                logger.info("Nenhum email foi preenchido. O PDF foi gerado e salvo.");
+                return false;
             }
 
-        } catch (Exception e) { // ESSE ERA O CATCH QUE FALTAVA
-            e.printStackTrace();
+            try {
+                String pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
+                String nomeArquivo = "Recibo_" + dados.servico.record + ".pdf";
+
+                Attachment anexoResend = Attachment.builder()
+                        .fileName(nomeArquivo)
+                        .content(pdfBase64)
+                        .build();
+
+                String chave = System.getenv("CHAVE_EMAIL");
+                Resend resend = new Resend(chave);
+
+                CreateEmailOptions parametros = CreateEmailOptions.builder()
+                        .from("Recibos Hdmr Ar <onboarding@resend.dev>")
+                        .to(emailDestino)
+                        .subject("Recibo de Serviço Hdmr Ar - " + dados.cliente.nameCustomer)
+                        .html("<p>Olá <strong>" + dados.cliente.nameCustomer + "</strong>,</p><p>Segue em anexo o seu recibo digital referente ao serviço prestado.</p><p>Obrigado pela preferência!</p>")
+                        .attachments(anexoResend)
+                        .build();
+
+                CreateEmailResponse resposta = resend.emails().send(parametros);
+                logger.info("Email enviado com sucesso via Resend! ID: {}", resposta.getId());
+                return true;
+
+            } catch (Exception erroResend) {
+                logger.error("Erro ao tentar enviar o e-mail pelo Resend: {}", erroResend.getMessage());
+                return false;
+            }
+
+        } catch (DuplicateKeyException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Falha ao processar o recibo N° {}", dados.servico.record, e);
             throw new RuntimeException("Falha ao processar o recibo: " + e.getMessage());
         }
     }
 }
-
