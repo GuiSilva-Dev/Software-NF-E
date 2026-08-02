@@ -13,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 // Restringe às origens conhecidas do front-end (produção + dev local do Vite)
                 .allowedOriginPatterns(
-                        "https://aquamarine-sprite-f048cf.netlify.app",
+                        "https://recibo-digital.netlify.app/",
                         "http://localhost:5173"
                 )
                 // Autoriza o front-end a fazer requisições usando qualquer um desses métodos HTTP
